@@ -1,3 +1,12 @@
+<label>Search Course</label>
+
+<input
+  type="text"
+  [(ngModel)]="searchTerm"
+  (input)="updateSearch()">
+
+<br><br>
+
 <div *ngIf="isLoading">
   <p>Loading courses...</p>
 </div>
@@ -5,8 +14,10 @@
 <div *ngIf="!isLoading && courses.length > 0; else noCourses">
 
   <app-course-card
+    appHighlight="lightblue"
     *ngFor="let c of courses; let i = index; trackBy: trackByCourseId"
     [course]="c"
+    (cardClicked)="goToCourse($event)"
     (enrollRequested)="onEnroll($event)">
   </app-course-card>
 

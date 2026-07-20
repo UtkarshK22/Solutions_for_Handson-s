@@ -37,13 +37,11 @@ export class HighlightDirective {
 
   @HostListener('mouseenter')
   onMouseEnter() {
-    console.log('Mouse Enter');
     this.element.nativeElement.style.backgroundColor = this.appHighlight;
   }
 
   @HostListener('mouseleave')
   onMouseLeave() {
-    console.log('Mouse Leave');
     this.element.nativeElement.style.backgroundColor = '';
   }
 

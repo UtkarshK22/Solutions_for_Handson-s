@@ -1,67 +1,47 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CourseCard } from '../../components/course-card/course-card';
 import { HighlightDirective } from '../../directives/highlight';
+import { CourseService } from '../../services/course';
+import { Course } from '../../models/course.model';
+import { Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-course-list',
   standalone: true,
-  imports: [CommonModule, CourseCard, HighlightDirective],
+  imports: [CommonModule,FormsModule, CourseCard, HighlightDirective],
   templateUrl: './course-list.html',
   styleUrl: './course-list.css'
 })
 export class CourseList implements OnInit{
 
-  courses = [
-    {
-      id: 1,
-      name: 'Angular',
-      code: 'ANG101',
-      credits: 4,
-      gradeStatus:'passed'
-    },
-    {
-      id: 2,
-      name: 'Java',
-      code: 'JAVA201',
-      credits: 3,
-      gradeStatus:'failed'
-    },
-    {
-      id: 3,
-      name: 'Spring Boot',
-      code: 'SPR301',
-      credits: 4,
-      gradeStatus:'pending'
-    },
-    {
-      id: 4,
-      name: 'Database Management',
-      code: 'DBMS401',
-      credits: 3,
-      gradeStatus:'passed'
-    },
-    {
-      id: 5,
-      name: 'Cloud Computing',
-      code: 'CC501',
-      credits: 4,
-      gradeStatus:'failed'
-    }
-  ];
+  courses: Course[] = [];
 
   isLoading = true;
   selectedCourseId = 0;
+  searchTerm = '';
 
   onEnroll(courseId: number) {
     console.log('Enrolling in course: ' + courseId);
     this.selectedCourseId = courseId;
   }
 
+    constructor(
+      private cdr: ChangeDetectorRef, 
+      private courseService: CourseService,
+      private router: Router,
+      private route: ActivatedRoute
+    ) {}
+
   ngOnInit(): void {
-  setTimeout(() => {
-    this.isLoading = false;
-  },1500);
+    this.courses = this.courseService.getCourses();
+    this.searchTerm =
+    this.route.snapshot.queryParamMap.get('search') || '';
+    setTimeout(() => {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    },1500);
   }
 
   // trackBy improves performance by allowing Angular
@@ -69,5 +49,21 @@ export class CourseList implements OnInit{
   trackByCourseId(index:number,course:any){
     return course.id;
   }
+
+  goToCourse(courseId: number) {
+    this.router.navigate(['courses', courseId]);
+  }
+
+  updateSearch() {
+  this.router.navigate(
+    ['courses'],
+    {
+      queryParams: {
+        search: this.searchTerm
+      }
+    }
+  );
+
+}
 
 }
