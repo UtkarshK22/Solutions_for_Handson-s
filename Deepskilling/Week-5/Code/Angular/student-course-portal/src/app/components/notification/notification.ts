@@ -1,19 +1,15 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NotificationService } from '../../services/notification';
 
 @Component({
   selector: 'app-notification',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './notification.html',
-  styleUrl: './notification.css',
-
-  // Component-level provider creates a NEW instance of
-  // NotificationService for this component and its children.
-  providers: [NotificationService]
+  styleUrl: './notification.css'
+  // no component-level `providers` here — must use the root singleton
 })
 export class Notification {
-
   constructor(public notificationService: NotificationService) {}
-
 }

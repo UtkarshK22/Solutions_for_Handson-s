@@ -109,6 +109,10 @@
 </form>
 <br>
 
+<div *ngIf="errorMessage" style="color:red;">
+  {{ errorMessage }}
+</div>
+
 <!-- Success Message -->
 <div *ngIf="submitted">
   <h3>Enrollment request submitted successfully!</h3>

@@ -7,26 +7,38 @@
 
 <br><br>
 
+<div *ngIf="errorMessage" style="color:red;">
+
+  {{ errorMessage }}
+
+</div>
+
 <div *ngIf="isLoading">
+
   <p>Loading courses...</p>
+
 </div>
 
 <div *ngIf="!isLoading && courses.length > 0; else noCourses">
 
   <app-course-card
     appHighlight="lightblue"
-    *ngFor="let c of courses; let i = index; trackBy: trackByCourseId"
+    *ngFor="let c of courses$ | async; trackBy: trackByCourseId"
     [course]="c"
     (cardClicked)="goToCourse($event)"
     (enrollRequested)="onEnroll($event)">
   </app-course-card>
 
   <p *ngIf="selectedCourseId">
+
     Selected Course ID: {{ selectedCourseId }}
+
   </p>
 
 </div>
 
 <ng-template #noCourses>
+
   <p>No courses available.</p>
+
 </ng-template>

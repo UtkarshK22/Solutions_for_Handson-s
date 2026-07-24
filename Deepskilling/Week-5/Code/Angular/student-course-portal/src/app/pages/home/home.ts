@@ -30,7 +30,11 @@ export class Home implements OnInit{
 
   ngOnInit(): void {
     this.coursesAvailable = 12;
-    this.courses = this.courseService.getCourses();
+    this.courseService.getCourses().subscribe({
+      next: (courses) => {
+        this.courses = courses;
+      }
+    });
     console.log('HomeComponent initialised — courses loaded');
   }
 

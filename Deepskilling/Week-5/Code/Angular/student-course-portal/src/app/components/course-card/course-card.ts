@@ -1,8 +1,20 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CreditLabelPipe } from '../../pipes/credit-label-pipe';
 import { HighlightDirective } from '../../directives/highlight';
-import { EnrollmentService } from '../../services/enrollment';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
+import * as EnrollmentActions from '../../store/enrollment/enrollment.actions';
+import { selectEnrolledIds } from '../../store/enrollment/enrollment.selectors';
 
 @Component({
   selector: 'app-course-card',
@@ -11,10 +23,12 @@ import { EnrollmentService } from '../../services/enrollment';
   templateUrl: './course-card.html',
   styleUrl: './course-card.css'
 })
-export class CourseCard implements OnChanges {
+export class CourseCard implements OnChanges, OnInit {
 
   enrolled = false;
   isExpanded = false;
+
+  enrolledIds$!: Observable<number[]>;
 
   @Input() course!: {
     id: number;
@@ -26,10 +40,14 @@ export class CourseCard implements OnChanges {
 
   @Output() enrollRequested = new EventEmitter<number>();
 
-  // NEW
-  @Output() cardClicked = new EventEmitter<number>();
+  @Output()
+  cardClicked = new EventEmitter<number>();
 
-  constructor(private enrollmentService: EnrollmentService) {}
+  constructor(private store: Store) {}
+
+  ngOnInit(): void {
+    this.enrolledIds$ = this.store.select(selectEnrolledIds);
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     console.log('Course changed:', changes['course']);
@@ -39,7 +57,7 @@ export class CourseCard implements OnChanges {
     return {
       'card--enrolled': this.enrolled,
       'card--full': this.course.credits >= 4,
-      'expanded': this.isExpanded
+      expanded: this.isExpanded
     };
   }
 
@@ -47,31 +65,46 @@ export class CourseCard implements OnChanges {
     switch (this.course.gradeStatus) {
       case 'passed':
         return 'green';
+
       case 'failed':
         return 'red';
+
       default:
         return 'gray';
     }
   }
-
   toggleDetails() {
     this.isExpanded = !this.isExpanded;
   }
 
-  toggleEnrollment() {
-    if (this.enrollmentService.isEnrolled(this.course.id)) {
-      this.enrollmentService.unenroll(this.course.id);
-    } else {
-      this.enrollmentService.enroll(this.course.id);
-    }
+  toggleEnrollment(event: Event) {
+    event.stopPropagation();
+  
+    this.store.select(selectEnrolledIds).pipe(
+      take(1)
+    ).subscribe(ids => {
+      if (ids.includes(this.course.id)) {
+        this.store.dispatch(
+          EnrollmentActions.unenrollFromCourse({
+            courseId: this.course.id
+          })
+        );
+      } else {
+        this.store.dispatch(
+          EnrollmentActions.enrollInCourse({
+            courseId: this.course.id
+          })
+        );
+      }
+    });
   }
 
-  isEnrolled(): boolean {
-    return this.enrollmentService.isEnrolled(this.course.id);
+  isEnrolled(): Observable<number[]> {
+    return this.enrolledIds$;
   }
 
-  // NEW
   onCardClick() {
     this.cardClicked.emit(this.course.id);
   }
+
 }

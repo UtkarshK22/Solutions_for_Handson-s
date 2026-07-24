@@ -27,18 +27,17 @@
     </p>
   </div>
 
-  <button
-    (click)="toggleEnrollment(); enrollRequested.emit(course.id); $event.stopPropagation()">
-
-    {{ isEnrolled() ? 'Unenroll' : 'Enroll' }}
-
+  <button (click)="toggleEnrollment($event)">
+    {{
+      (enrolledIds$ | async)?.includes(course.id)
+        ? 'Unenroll'
+        : 'Enroll'
+    }}
   </button>
 
   <button
     (click)="toggleDetails(); $event.stopPropagation()">
-
     Show Details
-
   </button>
 
 </div>

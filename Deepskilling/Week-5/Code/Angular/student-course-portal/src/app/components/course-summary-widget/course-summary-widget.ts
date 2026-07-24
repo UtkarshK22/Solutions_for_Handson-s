@@ -11,6 +11,10 @@ import { Course } from '../../models/course.model';
 export class CourseSummaryWidget {
   courses: Course[] = [];
   constructor(private courseService: CourseService) {
-    this.courses = this.courseService.getCourses();
+    this.courseService.getCourses().subscribe({
+      next: (courses) => {
+        this.courses = courses;
+      }
+});
   }
 }
